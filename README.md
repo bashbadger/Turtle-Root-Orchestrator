@@ -4,4 +4,5 @@
    --min-instances 1 \
    --region us-central1 \
    --allow-unauthenticated
+
 ⚠️ Safety DisclaimerTurtle_Agent_Orchestrator operates with full system-level access. The traffic isolation logic in main.py should never be disabled. It is the Architect's duty to protect the "Shell" (API keys and Discord tokens).
