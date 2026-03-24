@@ -1,0 +1,59 @@
+import os
+import zipfile
+from datetime import datetime
+
+def zip_framework():
+    """
+    Packages the Open Claw framework into a transportable zip archive.
+    Strictly enforces exclusions and implements annotated version tracking.
+    """
+    # Require operator input for the changelog
+    print("🦾 Open Claw: Packaging Utility")
+    version_msg = input("Enter a brief changelog or version description: ").strip()
+    if not version_msg:
+        version_msg = "Automated packaging snapshot."
+
+    # Generate version tag based on current timestamp
+    timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_filename = f"open_claw_release_v{timestamp_str}.zip"
+
+    # Define directories and files to explicitly exclude for security
+    exclusions = {
+        '.git', 
+        '__pycache__', 
+        '.env', 
+        'openclaw.key', 
+        'openclaw.crt', 
+        'certs', 
+        'security/rolling_key.key',
+        'logs',
+        'version_history.log'
+    }
+    
+    print(f"\n📦 Initializing packaging sequence for {output_filename}...")
+    
+    with zipfile.ZipFile(output_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk("."):
+            # Modify dirs in-place to skip excluded directories entirely
+            dirs[:] = [d for d in dirs if d not in exclusions]
+            
+            for file in files:
+                # Skip excluded files and any existing zip archives
+                if file in exclusions or file.endswith('.zip') or file.endswith('.key'):
+                    print(f"  [BLOCKED] Skipping sensitive file: {file}")
+                    continue
+                
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, ".")
+                zipf.write(file_path, arcname)
+                print(f"  [ADDED] {arcname}")
+                
+    # Append to version tracking log with the operator's message
+    with open("version_history.log", "a") as log:
+        log.write(f"[{datetime.now().isoformat()}] {output_filename} - {version_msg}\n")
+                
+    print(f"\n✅ Packaging complete. System ready for transport: {output_filename}")
+    print(f"📄 Version and changelog securely appended to version_history.log")
+
+if __name__ == "__main__":
+    zip_framework()
