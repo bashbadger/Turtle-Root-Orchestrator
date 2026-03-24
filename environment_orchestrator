@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  openclaw_sandbox:
+    build: .
+    container_name: openclaw_isolated_core
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - GCS_BUCKET_NAME=${GCS_BUCKET_NAME}
+      - MY_DISCORD_ID=${MY_DISCORD_ID}
+      - EXTENSION_API_KEY=${EXTENSION_API_KEY}
+    volumes:
+      # Binds the Docker socket so the Python script can spawn ephemeral sub-containers
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.0
